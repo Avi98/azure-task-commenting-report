@@ -1,0 +1,80 @@
+{
+	"manifestVersion": 1,
+	"id": "5fe3e030-1add-6a2c-89b1-3dc0949111c0",
+	"version": "0.0.1",
+	"name": "Performance Monitor CI",
+	"publisher": "pref-monitor-ci",
+	"description": "Performance Monitor tool that is used to monitor and report the chrome web vitals metrics on the PR. It uses web-vitals-CLI to run the metrics and generate the report.",
+	"targets": [
+	  {
+	    "id": "Microsoft.VisualStudio.Services"
+	  }
+	],
+	"categories": [
+	  "Azure Pipelines"
+	],
+	"tags": [
+	  "Performance-report",
+	  "web-vitals-ci"
+	],
+	"galleryFlags": [
+	  "Free",
+	  "Public"
+	],
+	"icons": {
+	  "default": "icon.png"
+	},
+	"content": {
+	  "details": {
+	    "path": "README.md"
+	  }
+	},
+	"files": [
+	  {
+	    "path": "images",
+	    "addressable": true
+	  },
+	  {
+	    "path": "src/install",
+	    "packagePath": "install"
+	  },
+	  {
+	    "path": "node_modules",
+	    "packagePath": "node_modules"
+	  }
+	],
+	"links": {
+	  "overview": {
+	    "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/README.md"
+	  },
+	  "license": {
+	    "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/LICENSE"
+	  },
+	  "repository": {
+	    "uri": "https://github.com/Avi98/azure-task-commenting-report"
+	  },
+	  "issues": {
+	    "uri": "https://github.com/Avi98/azure-task-commenting-report/issues"
+	  }
+	},
+	"repository": {
+	  "type": "git",
+	  "uri": "https://github.com/Avi98/azure-task-commenting-report"
+	},
+	"badges": [
+	  {
+	    "href": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_build/latest?definitionId=-1",
+	    "uri": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_apis/build/status/%5Bnetlify%5D%20dev%2C%20feature%2C%20hotfix",
+	    "description": "Build Status"
+	  }
+	],
+	"contributions": [
+	  {
+	    "id": "perf-monitor",
+	    "type": "ms.vss-distributed-task.task",
+	    "targets": [
+	      "ms.vss-distributed-task.tasks"
+	    ]
+	  }
+	]
+      }
