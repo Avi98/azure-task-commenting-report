@@ -31,17 +31,9 @@
 	},
 	"files": [
 	  {
-	    "path": "images",
-	    "addressable": true
-	  },
-	  {
-	    "path": "src/install",
-	    "packagePath": "install"
-	  },
-	  {
-	    "path": "node_modules",
-	    "packagePath": "node_modules"
+	    "path": "pref-monitor-ci"
 	  }
+	  
 	],
 	"links": {
 	  "overview": {
@@ -69,12 +61,15 @@
 	  }
 	],
 	"contributions": [
-	  {
-	    "id": "perf-monitor",
-	    "type": "ms.vss-distributed-task.task",
-	    "targets": [
-	      "ms.vss-distributed-task.tasks"
-	    ]
-	  }
+		{
+			"id": "custom-build-release-task",
+			"type": "ms.vss-distributed-task.task",
+			"targets": [
+			    "ms.vss-distributed-task.tasks"
+			],
+			"properties": {
+			    "name": "pref-monitor-ci"
+			}
+		    } 
 	]
       }
