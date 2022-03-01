@@ -15,7 +15,10 @@
                 "<node_internals>/**"
             ],
             "env": {
-                "INPUT_samplestring":"sampelstringlubch"
+                "INPUT_samplestring":"sampelstringlubch",
+                "PUPPETEER_SKIP_DOWNLOAD": "true",
+                "agent.tempDirectory":"src",
+                "PATH":null
             },
             "program": "${file}"
         }
