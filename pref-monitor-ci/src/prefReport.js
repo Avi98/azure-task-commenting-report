@@ -18,44 +18,45 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _prefMonitor, _prefMonitorVersion, _commentFilePath;
+var _PrefReportCI_prefMonitor, _PrefReportCI_commentFilePath;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrefReportCI = void 0;
 const fs = __importStar(require("fs"));
+const os = __importStar(require("os"));
 const path = __importStar(require("path"));
 const task = __importStar(require("azure-pipelines-task-lib/task"));
+const { v4: uuid4 } = require("uuid");
 class PrefReportCI {
     constructor() {
-        _prefMonitor.set(this, "web-vitals-cli");
-        _prefMonitorVersion.set(this, "");
-        _commentFilePath.set(this, "");
-        __classPrivateFieldSet(this, _prefMonitorVersion, task.getInput("prefMonitorVersion", false) || null);
-        __classPrivateFieldSet(this, _commentFilePath, path.join(task.getVariable("Build.SourcesDirectory") || "", "/comment.txt"));
+        _PrefReportCI_prefMonitor.set(this, "pref-report-cli@0.0.1");
+        _PrefReportCI_commentFilePath.set(this, "");
+        __classPrivateFieldSet(this, _PrefReportCI_commentFilePath, path.join(task.getVariable("Build.SourcesDirectory") || "", "/comment.txt"), "f");
     }
     async run() {
-        const prefMonitor = __classPrivateFieldGet(this, _prefMonitor);
-        const isInstalledPrefMonitor = task.which(prefMonitor, false);
+        const prefMonitor = __classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f");
+        const isInstalledPrefMonitor = task.which(prefMonitor);
         if (!isInstalledPrefMonitor) {
             task.debug(`-------${prefMonitor} is not found. Installing ${prefMonitor}------`);
             await this.installPrefMonitor();
         }
-        this.runPrefMonitor();
+        await this.runPrefMonitor();
     }
-    runPrefMonitor() {
-        const prefTool = task.tool(__classPrivateFieldGet(this, _prefMonitor));
+    async runPrefMonitor() {
+        const prefInstall = task.which(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
+        if (!prefInstall)
+            return;
+        const prefTool = await task.tool(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
         prefTool
             .line("-r")
             .exec()
@@ -68,7 +69,7 @@ class PrefReportCI {
     }
     readComment() {
         try {
-            const filePath = __classPrivateFieldGet(this, _commentFilePath);
+            const filePath = __classPrivateFieldGet(this, _PrefReportCI_commentFilePath, "f");
             const data = fs.readFileSync(filePath);
             console.log("data", data);
         }
@@ -76,22 +77,27 @@ class PrefReportCI {
     }
     async installPrefMonitor() {
         try {
-            const args = ["install", "-g"];
-            if (__classPrivateFieldGet(this, _prefMonitorVersion)) {
-                args.push(`${__classPrivateFieldGet(this, _prefMonitor)}@${__classPrivateFieldGet(this, _prefMonitorVersion)}`);
-            }
+            const tempDir = task.getVariable("agent.tempDirectory") || process.cwd();
+            task.checkPath(tempDir, `${tempDir} ${tempDir}`);
+            const filePath = path.join(tempDir, uuid4() + ".sh");
+            if (os.platform() !== "win32")
+                fs.writeFileSync(filePath, `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
+            const prefMonitorInstall = await task
+                .tool(task.which("bash"))
+                .arg(filePath)
+                .exec();
+            if (prefMonitorInstall !== 0)
+                throw new Error("Failed to install");
             else {
-                args.push(__classPrivateFieldGet(this, _prefMonitor));
+                task.debug("-------Successfully installed CLI------");
+                return;
             }
-            await task.exec("npm", args);
-            task.debug(`-----${__classPrivateFieldGet(this, _prefMonitor)} installed successfully-----`);
         }
         catch (error) {
-            debugger;
             task.setResult(task.TaskResult.Failed, error);
         }
     }
 }
 exports.PrefReportCI = PrefReportCI;
-_prefMonitor = new WeakMap(), _prefMonitorVersion = new WeakMap(), _commentFilePath = new WeakMap();
+_PrefReportCI_prefMonitor = new WeakMap(), _PrefReportCI_commentFilePath = new WeakMap();
 //# sourceMappingURL=prefReport.js.map

@@ -18,7 +18,7 @@ export class PrefReportCI {
 
   async run() {
     const prefMonitor = this.#prefMonitor;
-    const isInstalledPrefMonitor = task.which(prefMonitor, false);
+    const isInstalledPrefMonitor = task.which(prefMonitor);
 
     if (!isInstalledPrefMonitor) {
       task.debug(
@@ -26,19 +26,21 @@ export class PrefReportCI {
       );
       await this.installPrefMonitor();
     }
+    task.debug(
+      `-------${prefMonitor} is found at ${isInstalledPrefMonitor}------`
+    );
     await this.runPrefMonitor();
     //@TODO
     // this.setBuildContext();
   }
 
   async runPrefMonitor() {
-    const prefInstall = task.which(this.#prefMonitor);
-    if (!prefInstall) return;
     const prefTool = await task.tool(this.#prefMonitor);
     prefTool
       .line("-r")
       .exec()
       .then(() => {
+        task.debug(`-------Completed running the ${this.#prefMonitor}------`);
         this.readComment();
       })
       .catch((error) => {
@@ -57,12 +59,12 @@ export class PrefReportCI {
   private async installPrefMonitor() {
     try {
       const tempDir = task.getVariable("agent.tempDirectory") || process.cwd();
-      // task.checkPath(tempDir, `${tempDir} ${tempDir}`);
+      task.checkPath(tempDir, `${tempDir} ${tempDir}`);
       const filePath = path.join(tempDir, uuid4() + ".sh");
       if (os.platform() !== "win32")
         fs.writeFileSync(
           filePath,
-          `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${
+          `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${
             this.#prefMonitor
           }`,
           { encoding: "utf8" }
@@ -73,7 +75,7 @@ export class PrefReportCI {
         .arg(filePath)
         .exec();
 
-      if (prefMonitorInstall !== 0) throw "Failed to install";
+      if (prefMonitorInstall !== 0) throw new Error("Failed to install");
       else {
         task.debug("-------Successfully installed CLI------");
         return;
