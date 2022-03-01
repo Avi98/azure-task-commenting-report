@@ -1,15 +1,15 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import * as task from "azure-pipelines-task-lib/task";
 
+const { v4: uuid4 } = require("uuid");
+
 export class PrefReportCI {
-  #prefMonitor: string = "web-vitals-cli";
-  #prefMonitorVersion: string | null = "";
+  #prefMonitor: string = "pref-report-cli@0.0.1";
   #commentFilePath: string = "";
 
   constructor() {
-    this.#prefMonitorVersion =
-      task.getInput("prefMonitorVersion", false) || null;
     this.#commentFilePath = path.join(
       task.getVariable("Build.SourcesDirectory") || "",
       "/comment.txt"
@@ -26,17 +26,19 @@ export class PrefReportCI {
       );
       await this.installPrefMonitor();
     }
-    this.runPrefMonitor();
+    await this.runPrefMonitor();
+    //@TODO
     // this.setBuildContext();
   }
 
-  runPrefMonitor() {
-    const prefTool = task.tool(this.#prefMonitor);
+  async runPrefMonitor() {
+    const prefInstall = task.which(this.#prefMonitor);
+    if (!prefInstall) return;
+    const prefTool = await task.tool(this.#prefMonitor);
     prefTool
       .line("-r")
       .exec()
       .then(() => {
-        //read the file
         this.readComment();
       })
       .catch((error) => {
@@ -51,19 +53,32 @@ export class PrefReportCI {
       console.log("data", data);
     } catch (e) {}
   }
+
   private async installPrefMonitor() {
     try {
-      const args = ["install", "-g"];
-      if (this.#prefMonitorVersion) {
-        args.push(`${this.#prefMonitor}@${this.#prefMonitorVersion}`);
-      } else {
-        args.push(this.#prefMonitor);
-      }
-      await task.exec("npm", args);
+      const tempDir = task.getVariable("agent.tempDirectory") || process.cwd();
+      // task.checkPath(tempDir, `${tempDir} ${tempDir}`);
+      const filePath = path.join(tempDir, uuid4() + ".sh");
+      if (os.platform() !== "win32")
+        fs.writeFileSync(
+          filePath,
+          `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${
+            this.#prefMonitor
+          }`,
+          { encoding: "utf8" }
+        );
 
-      task.debug(`-----${this.#prefMonitor} installed successfully-----`);
+      const prefMonitorInstall = await task
+        .tool(task.which("bash"))
+        .arg(filePath)
+        .exec();
+
+      if (prefMonitorInstall !== 0) throw "Failed to install";
+      else {
+        task.debug("-------Successfully installed CLI------");
+        return;
+      }
     } catch (error) {
-      debugger;
       task.setResult(task.TaskResult.Failed, error);
     }
   }
