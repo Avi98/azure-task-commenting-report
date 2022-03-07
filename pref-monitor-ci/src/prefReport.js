@@ -70,7 +70,6 @@ class PrefReportCI {
             .catch((error) => {
             task.setResult(task.TaskResult.Failed, error);
         });
-        console.log("prefTool", prefTool);
     }
     readComment() {
         try {
@@ -86,7 +85,7 @@ class PrefReportCI {
             task.checkPath(tempDir, `${tempDir} ${tempDir}`);
             const filePath = path.join(tempDir, uuid4() + ".sh");
             if (os.platform() !== "win32")
-                fs.writeFileSync(filePath, `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
+                fs.writeFileSync(filePath, `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
             const prefMonitorInstall = await task
                 .tool(task.which("bash"))
                 .arg(filePath)
@@ -95,8 +94,8 @@ class PrefReportCI {
                 throw new Error("Failed to install");
             else {
                 task.debug("-------Successfully installed CLI------");
-                return;
             }
+            fs.unlink(filePath, () => { });
         }
         catch (error) {
             task.setResult(task.TaskResult.Failed, error);
