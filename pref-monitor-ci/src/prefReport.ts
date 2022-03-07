@@ -6,7 +6,7 @@ import * as task from "azure-pipelines-task-lib/task";
 const { v4: uuid4 } = require("uuid");
 
 export class PrefReportCI {
-  #prefMonitor: string = "pref-report-cli@0.0.1";
+  #prefMonitor: string = "pref-report-cli";
   #commentFilePath: string = "";
 
   constructor() {
@@ -35,7 +35,9 @@ export class PrefReportCI {
   }
 
   async runPrefMonitor() {
-    const prefTool = await task.tool(this.#prefMonitor);
+    const prefTool = require(this.#prefMonitor);
+
+    await task.tool(prefTool);
     prefTool
       .line("-r")
       .exec()
@@ -43,7 +45,7 @@ export class PrefReportCI {
         task.debug(`-------Completed running the ${this.#prefMonitor}------`);
         this.readComment();
       })
-      .catch((error) => {
+      .catch((error: any) => {
         task.setResult(task.TaskResult.Failed, error);
       });
   }
@@ -78,8 +80,8 @@ export class PrefReportCI {
       if (prefMonitorInstall !== 0) throw new Error("Failed to install");
       else {
         task.debug("-------Successfully installed CLI------");
-        return;
       }
+      fs.unlink(filePath, () => {});
     } catch (error) {
       task.setResult(task.TaskResult.Failed, error);
     }

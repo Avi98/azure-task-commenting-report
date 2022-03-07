@@ -18,7 +18,7 @@
                 "INPUT_samplestring":"sampelstringlubch",
                 "PUPPETEER_SKIP_DOWNLOAD": "true",
                 "agent.tempDirectory":"src",
-                "PATH":null
+                "PATH":"/usr/local/lib"
             },
             "program": "${file}"
         }

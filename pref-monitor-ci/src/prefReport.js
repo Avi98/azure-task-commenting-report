@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -39,7 +43,7 @@ const task = __importStar(require("azure-pipelines-task-lib/task"));
 const { v4: uuid4 } = require("uuid");
 class PrefReportCI {
     constructor() {
-        _PrefReportCI_prefMonitor.set(this, "pref-report-cli@0.0.1");
+        _PrefReportCI_prefMonitor.set(this, "pref-report-cli");
         _PrefReportCI_commentFilePath.set(this, "");
         __classPrivateFieldSet(this, _PrefReportCI_commentFilePath, path.join(task.getVariable("Build.SourcesDirectory") || "", "/comment.txt"), "f");
     }
@@ -50,22 +54,23 @@ class PrefReportCI {
             task.debug(`-------${prefMonitor} is not found. Installing ${prefMonitor}------`);
             await this.installPrefMonitor();
         }
+        task.debug(`-------${prefMonitor} is found at ${isInstalledPrefMonitor}------`);
         await this.runPrefMonitor();
     }
     async runPrefMonitor() {
-        const prefInstall = task.which(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
-        if (!prefInstall)
-            return;
-        const prefTool = await task.tool(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
+        const prefTool = require(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
+        await task.tool(prefTool);
         prefTool
             .line("-r")
             .exec()
             .then(() => {
+            task.debug(`-------Completed running the ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}------`);
             this.readComment();
         })
             .catch((error) => {
             task.setResult(task.TaskResult.Failed, error);
         });
+        console.log("prefTool", prefTool);
     }
     readComment() {
         try {
@@ -81,7 +86,7 @@ class PrefReportCI {
             task.checkPath(tempDir, `${tempDir} ${tempDir}`);
             const filePath = path.join(tempDir, uuid4() + ".sh");
             if (os.platform() !== "win32")
-                fs.writeFileSync(filePath, `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
+                fs.writeFileSync(filePath, `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
             const prefMonitorInstall = await task
                 .tool(task.which("bash"))
                 .arg(filePath)
