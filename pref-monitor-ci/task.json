@@ -21,6 +21,14 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Arguments for CLI"
+    },
+    {
+      "name": "ConfigFilePath",
+      "type": "string",
+      "label": "config file path",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Config file path for CLI"
     }
   ],
   "execution": {

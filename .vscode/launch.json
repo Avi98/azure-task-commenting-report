@@ -5,6 +5,46 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "name": "Launch Extension",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "preLaunchTask": "npm",
+            "request": "launch",
+            "type": "pwa-extensionHost",
+            "env": {
+                "NODE_ENV": "development",
+                // param (enter your input params here!)
+                "INPUT_WebhookUrl": "MyVariables",
+                "INPUT_Template": "Empty",
+                "INPUT_Json": "{\"text\":\"I am a test message\",\"attachments\":[{\"text\":\"And here’s an attachment!\"}]}",
+                "INPUT_Separator": ";",
+                "INPUT_CONFIGFILEPATH":"./webvitalsrc.js",
+                // env
+                "AGENT_JOBSTATUS": "Succeeded",
+                "AGENT_NAME": "MyAgent",
+                "BUILD_BUILDID": "5",
+                "BUILD_BUILDNUMBER": "20210108.1",
+                "BUILD_REASON": "Scheduled",
+                "BUILD_REPOSITORY_NAME": "MyRepo",
+                "BUILD_SOURCEBRANCHNAME": "master",
+                "BUILD_SOURCEVERSION": "122a24f",
+                "BUILDCONFIGURATION": "Debug",
+                "BUILD_SOURCE_DIRECTORY": "./src",
+                "BUILDPLATFORM": "Any CPU",
+                "SYSTEM_ACCESSTOKEN": "",
+                "SYSTEM_DEFINITIONNAME": "MyDefinitionName",
+                "SYSTEM_TEAMFOUNDATIONSERVERURI": "https://myurl.de/mycollection/",
+                "SYSTEM_TEAMPROJECT": "PSItraffic",
+                // debug
+                "DEBUG_PAT": "my debug pat"
+              },
+        },
+        
+        {
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch Program",
@@ -14,12 +54,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "env": {
-                "INPUT_samplestring":"sampelstringlubch",
-                "PUPPETEER_SKIP_DOWNLOAD": "true",
-                "agent.tempDirectory":"src",
-                "PATH":"/usr/local/lib"
-            },
+       
             "program": "${file}"
         }
     ]
