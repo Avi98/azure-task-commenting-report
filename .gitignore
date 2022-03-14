@@ -1,2 +1,6 @@
 node_modules
 .taskkey
+build
+webVitalsrc.js
+WEB_VITALS_REPORT
+comment.md

@@ -33,21 +33,25 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _PrefReportCI_prefMonitor, _PrefReportCI_commentFilePath;
+var _PrefReportCI_prefMonitor, _PrefReportCI_configFilePath;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrefReportCI = void 0;
 const fs = __importStar(require("fs"));
 const os = __importStar(require("os"));
 const path = __importStar(require("path"));
 const task = __importStar(require("azure-pipelines-task-lib/task"));
+const variables_1 = require("./utils/variables");
 const { v4: uuid4 } = require("uuid");
 class PrefReportCI {
     constructor() {
         _PrefReportCI_prefMonitor.set(this, "pref-report-cli");
-        _PrefReportCI_commentFilePath.set(this, "");
-        __classPrivateFieldSet(this, _PrefReportCI_commentFilePath, path.join(task.getVariable("Build.SourcesDirectory") || "", "/comment.txt"), "f");
+        _PrefReportCI_configFilePath.set(this, "");
+        __classPrivateFieldSet(this, _PrefReportCI_configFilePath, variables_1.variables.Env.Params.ConfigFile ||
+            path.join(process.cwd(), "webVitalsrc.js"), "f");
     }
     async run() {
+        const configFile = __classPrivateFieldGet(this, _PrefReportCI_configFilePath, "f");
+        task.debug(configFile);
         const prefMonitor = __classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f");
         const isInstalledPrefMonitor = task.which(prefMonitor);
         if (!isInstalledPrefMonitor) {
@@ -58,34 +62,31 @@ class PrefReportCI {
         await this.runPrefMonitor();
     }
     async runPrefMonitor() {
-        const prefTool = require(__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f"));
-        await task.tool(prefTool);
-        prefTool
-            .line("-r")
+        const prefTool = __classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f");
+        const hasPrefTool = task.which(prefTool);
+        task.debug(`prefTool --configFilePath ${__classPrivateFieldGet(this, _PrefReportCI_configFilePath, "f")}`);
+        console.log("file path", __classPrivateFieldGet(this, _PrefReportCI_configFilePath, "f"));
+        if (!hasPrefTool)
+            return;
+        await task
+            .tool(prefTool)
+            .line("--markdown")
+            .line(`--configFilePath ${__classPrivateFieldGet(this, _PrefReportCI_configFilePath, "f")}`)
             .exec()
             .then(() => {
             task.debug(`-------Completed running the ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}------`);
-            this.readComment();
         })
             .catch((error) => {
             task.setResult(task.TaskResult.Failed, error);
         });
     }
-    readComment() {
-        try {
-            const filePath = __classPrivateFieldGet(this, _PrefReportCI_commentFilePath, "f");
-            const data = fs.readFileSync(filePath);
-            console.log("data", data);
-        }
-        catch (e) { }
-    }
     async installPrefMonitor() {
         try {
             const tempDir = task.getVariable("agent.tempDirectory") || process.cwd();
             task.checkPath(tempDir, `${tempDir} ${tempDir}`);
-            const filePath = path.join(tempDir, uuid4() + ".sh");
+            const filePath = path.join(process.cwd(), uuid4() + ".sh");
             if (os.platform() !== "win32")
-                fs.writeFileSync(filePath, `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")}`, { encoding: "utf8" });
+                fs.writeFileSync(filePath, `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${__classPrivateFieldGet(this, _PrefReportCI_prefMonitor, "f")} --unsafe-perm=true --allow-root`, { encoding: "utf8" });
             const prefMonitorInstall = await task
                 .tool(task.which("bash"))
                 .arg(filePath)
@@ -103,5 +104,5 @@ class PrefReportCI {
     }
 }
 exports.PrefReportCI = PrefReportCI;
-_PrefReportCI_prefMonitor = new WeakMap(), _PrefReportCI_commentFilePath = new WeakMap();
+_PrefReportCI_prefMonitor = new WeakMap(), _PrefReportCI_configFilePath = new WeakMap();
 //# sourceMappingURL=prefReport.js.map
