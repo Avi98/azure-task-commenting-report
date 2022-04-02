@@ -28,11 +28,12 @@ const task = __importStar(require("azure-pipelines-task-lib/task"));
 exports.variables = {
     Env: {
         Params: {
-            ConfigFile: task.getInput("CONFIGFILEPATH"),
+            SourceDirectory: getVariable("build.sourcesDirectory"),
         },
         Agent: {
             JobStatus: getVariable("AGENT_JOB_STATUS"),
             Name: getVariable("AGENT_NAME"),
+            TempDir: getVariable("AGENT_TEMPDIRECTORY"),
         },
         System: {
             AccessToken: getVariable("SYSTEM_ACCESSTOKEN"),

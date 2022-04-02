@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc",
-    "dev": "tsc -w & nodemon src/index.js"
+    "dev": "tsc -w & nodemon src/index.js",
+    "publish": "tfx extension create --publisher 5fe3e030-1add-6a2c-89b1-3dc0949111c0 --manifest-js myextension.config.js --env mode=production"
   },
   "author": "",
   "license": "ISC",

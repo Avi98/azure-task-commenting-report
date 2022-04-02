@@ -11,15 +11,13 @@ export class PrefReportCI {
   #configFilePath: string = "";
 
   constructor() {
-    this.#configFilePath =
-      variables.Env.Params.ConfigFile ||
-      path.join(process.cwd(), "webVitalsrc.js");
+    this.#configFilePath = path.resolve(
+      variables.Env.Params.SourceDirectory,
+      "webVitalsrc.js"
+    );
   }
 
   async run() {
-    const configFile = this.#configFilePath;
-
-    task.debug(configFile);
     const prefMonitor = this.#prefMonitor;
     const isInstalledPrefMonitor = task.which(prefMonitor);
 
@@ -27,12 +25,16 @@ export class PrefReportCI {
       task.debug(
         `-------${prefMonitor} is not found. Installing ${prefMonitor}------`
       );
-      await this.installPrefMonitor();
+      await this.installPrefMonitor().catch((error) => {
+        task.setResult(task.TaskResult.Failed, error);
+      });
     }
     task.debug(
       `-------${prefMonitor} is found at ${isInstalledPrefMonitor}------`
     );
-    await this.runPrefMonitor();
+    await this.runPrefMonitor().catch((error) => {
+      task.setResult(task.TaskResult.Failed, error);
+    });
     //@TODO
     // this.setBuildContext();
   }
@@ -41,7 +43,6 @@ export class PrefReportCI {
     const prefTool = this.#prefMonitor;
     const hasPrefTool = task.which(prefTool);
     task.debug(`prefTool --configFilePath ${this.#configFilePath}`);
-    console.log("file path", this.#configFilePath);
     if (!hasPrefTool) return;
     await task
       .tool(prefTool)
@@ -69,17 +70,38 @@ export class PrefReportCI {
       const tempDir = task.getVariable("agent.tempDirectory") || process.cwd();
       task.checkPath(tempDir, `${tempDir} ${tempDir}`);
       const filePath = path.join(process.cwd(), uuid4() + ".sh");
-      if (os.platform() !== "win32")
+
+      task.debug(`os platform----> ${os.platform()}`);
+      task.debug(`install puppeteer globally----> ${os.platform()}`);
+      const chromePath = task.which("google-chrome");
+      if (chromePath) {
+        task.debug(`chrome path found at -----> ${chromePath}`);
+      } else {
+        task.debug("chromepath not found");
+      }
+      if (os.platform() === "win32") {
         fs.writeFileSync(
           filePath,
           `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${
             this.#prefMonitor
-          } --unsafe-perm=true --allow-root`,
+          } puppeteer`,
           { encoding: "utf8" }
         );
+      } else {
+        fs.writeFileSync(
+          filePath,
+          `sudo PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install -g ${
+            this.#prefMonitor
+          } puppeteer`,
+          { encoding: "utf8" }
+        );
+      }
 
+      task.debug(`---skip chromium install---`);
       const prefMonitorInstall = await task
-        .tool(task.which("bash"))
+        .tool(task.which("bash", true))
+        .arg("--noprofile")
+        .arg(`--norc`)
         .arg(filePath)
         .exec();
 

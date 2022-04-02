@@ -5,7 +5,7 @@ export const variables = {
   Env: {
     //----params
     Params: {
-      ConfigFile: task.getInput("CONFIGFILEPATH"),
+      SourceDirectory: getVariable("build.sourcesDirectory"),
     },
     Agent: {
       JobStatus: getVariable("AGENT_JOB_STATUS"),
