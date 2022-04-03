@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+  "id": "6ac207cb-0234-4c08-a272-c4937ad7a91c",
+  "name": "pref-monitor-ci",
+  "friendlyName": "Run performance CLI",
+  "description": "Runs performance CLI, generates report and add comment on the respective PR.",
+  "helpMarkDown": "Run performance CLI and generate report",
+  "category": "Azure Pipeline",
+  "author": "Avinash",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "instanceNameFormat": "Install and run Performance CLI",
+  "inputs": [
+    {
+      "name": "args",
+      "type": "string",
+      "label": "CLI args",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Arguments for CLI"
+    },
+    {
+      "name": "ConfigFilePath",
+      "type": "string",
+      "label": "config file path",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Config file path for CLI"
+    }
+  ],
+  "execution": {
+    "Node10": {
+      "target": "src/index.js"
+    }
+  }
+}

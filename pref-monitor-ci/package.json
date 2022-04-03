@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc",
-    "dev": "tsc -w & nodemon src/index.js",
+    "build": "rimraf .bin && tsc -p .",
+    "start":"copyfile -f ./tasks/prefMonitorCiV0 ./src && build",
+    "dev": "npm run build && tsc -w && nodemon .bin/index.js",
+    "pack": "rimraf ./.dist && copyfiles vss-extension.json vss-extension-icon.png LICENSE.md README.md \"./task/**\" ./.dist && copyfiles -f package.json \"./.bin/*.js\" \"./.bin/**/*.js\" -e \"./.bin/tests/*\" ./.dist/task/CreatePRCommentTaskV0 && copyfiles -f package.json \"./.bin/*.js\" \"./.bin/**/*.js\" -e \"./.bin/tests/*\" ./.dist/task/CreatePRCommentTaskV1 && loop \"npm install --only=prod\" --cwd ./.dist/task",
     "publish": "tfx extension create --publisher 5fe3e030-1add-6a2c-89b1-3dc0949111c0 --manifest-js myextension.config.js --env mode=production"
   },
   "author": "",
@@ -19,6 +21,9 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^17.0.14",
     "@types/q": "^1.5.5",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^2.0.15",
+    "rimraf": "^3.0.2",
     "sync-request": "^6.1.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
