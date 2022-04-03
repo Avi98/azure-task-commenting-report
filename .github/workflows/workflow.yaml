@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - masters
-      - "feature/**" #remove this once the testing is done. Need to remove after testing.
-
     paths-ignore:
       - ".gitignore"
       - ".vscode/**"
+defaults:
+  run:
+    working-directory: pref-monitor-ci
 
 jobs:
   cicd:
@@ -24,23 +25,18 @@ jobs:
           node-version: "14.x"
 
       - name: clean install dependencies
-        working-directory: pref-monitor-ci
         run: npm ci
 
       - name: create build && cpy task
-        working-directory: pref-monitor-ci
         run: npm run build && npm run copyTask
 
       - name: pack the task
-        working-directory: pref-monitor-ci
         run: npm run pack
 
       - name: create Extension
-        working-directory: pref-monitor-ci
         run: npm run create
 
       - name: print vsix path
-        working-directory: pref-monitor-ci
         run: |
           echo "VISX path:  ${{env.vsix_path}}"
 
@@ -48,5 +44,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: vsix-extension
-          working-directory: pref-monitor-ci
-          path: ${{github.workspace}}/pref-monitor-ci.**.vsix
+          path: ${{github.workspace}}/pref-monitor-ci/pref-monitor-ci.**.vsix
