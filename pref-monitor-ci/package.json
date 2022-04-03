@@ -9,8 +9,7 @@
     "copyTask": "npm run build && copyfiles -f ./tasks/prefMonitorCiV0/task.json ./.bin",
     "pack": "rimraf ./.dist && copyfiles vss-extension.json vss-extension-icon.png LICENSE.md README.md \"./task/**\" ./.dist && copyfiles -f package.json \"./.bin/*.js\" \"./.bin/**/*.js\" -e \"./.bin/tests/*\" ./.dist/task/PrefMonitorCiV0 && copyfiles -f package.json \"./.bin/*.js\" \"./.bin/**/*.js\" -e \"./.bin/tests/*\" ./.dist/task/prefMonitorCiV1 && loop \"npm install --only=prod\" --cwd ./.dist/task",
     "dev": "npm run build && tsc -w && nodemon .bin/index.js",
-    "create": "tfx extension create -r .dist",
-    "publish": "tfx extension create --publisher 5fe3e030-1add-6a2c-89b1-3dc0949111c0 --manifest-js myextension.config.js --env mode=production"
+    "create": "tfx extension create -r .dist"
   },
   "author": "",
   "license": "ISC",
