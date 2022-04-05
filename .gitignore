@@ -4,3 +4,5 @@ build
 webVitalsrc.js
 WEB_VITALS_REPORT
 comment.md
+.bin/
+.dist/

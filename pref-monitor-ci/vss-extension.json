@@ -22,7 +22,7 @@
 	  "Public"
 	],
 	"icons": {
-	  "default": "icon.png"
+	  "default": "vss-extension-icon.png"
 	},
 	"content": {
 	  "details": {
@@ -31,7 +31,7 @@
 	},
 	"files": [
 	  {
-	    "path": "pref-monitor-ci"
+	    "path": "task"
 	  }
 	  
 	],

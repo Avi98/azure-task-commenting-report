@@ -1,0 +1,47 @@
+name: Publish Extension on VS Marketplace
+
+on:
+  push:
+    branches:
+      - masters
+    paths-ignore:
+      - ".gitignore"
+      - ".vscode/**"
+defaults:
+  run:
+    working-directory: pref-monitor-ci
+
+jobs:
+  cicd:
+    name: cicd
+    runs-on: ubuntu-18.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14.x"
+
+      - name: clean install dependencies
+        run: npm ci
+
+      - name: create build && cpy task
+        run: npm run build && npm run copyTask
+
+      - name: pack the task
+        run: npm run pack
+
+      - name: create Extension
+        run: npm run create
+
+      - name: print vsix path
+        run: |
+          echo "VISX path:  ${{env.vsix_path}}"
+
+      - name: upload extension to artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: vsix-extension
+          path: ${{github.workspace}}/pref-monitor-ci/pref-monitor-ci.**.vsix
