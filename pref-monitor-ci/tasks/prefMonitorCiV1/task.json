@@ -10,7 +10,7 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 0
+    "Patch": 1
   },
   "instanceNameFormat": "Install and run Performance CLI",
   "inputs": [
@@ -29,6 +29,13 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Config file path for CLI"
+    },
+    {
+      "name": "AzureDevopsPat",
+      "type": "string",
+      "label": "Personal Access Token",
+      "required": true,
+      "helpMarkDown": "Pat token for azure"
     }
   ],
   "execution": {

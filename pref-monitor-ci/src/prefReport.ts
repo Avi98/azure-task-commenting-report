@@ -3,6 +3,7 @@ import * as os from "os";
 import * as path from "path";
 import * as task from "azure-pipelines-task-lib/task";
 import { variables } from "./utils/variables";
+import { commentLHReport } from "./createPrComment";
 
 const { v4: uuid4 } = require("uuid");
 
@@ -51,19 +52,12 @@ export class PrefReportCI {
       .exec()
       .then(() => {
         task.debug(`-------Completed running the ${this.#prefMonitor}------`);
+        commentLHReport.commentReport();
       })
       .catch((error: any) => {
         task.setResult(task.TaskResult.Failed, error);
       });
   }
-
-  // private readComment() {
-  //   try {
-  //     const filePath = this.#commentFilePath;
-  //     const data = fs.readFileSync(filePath);
-  //     console.log("data", data);
-  //   } catch (e) {}
-  // }
 
   private async installPrefMonitor() {
     try {
