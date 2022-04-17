@@ -27,11 +27,8 @@ jobs:
       - name: clean install dependencies
         run: npm ci
 
-      - name: create build && cpy task
-        run: npm run build && npm run copyTask
-
-      - name: pack the task
-        run: npm run pack
+      - name: build and pack V1 task
+        run: npm run packTaskV1
 
       - name: create Extension
         run: npm run create

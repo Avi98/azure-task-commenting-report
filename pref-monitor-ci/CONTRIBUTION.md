@@ -18,3 +18,17 @@ npm install
 ```bash
 npm run dev
 ```
+
+## Build Extension
+
+1. create build and pack
+
+```bash
+npm run packV1
+```
+
+or
+
+```bash
+npm run packV2
+```

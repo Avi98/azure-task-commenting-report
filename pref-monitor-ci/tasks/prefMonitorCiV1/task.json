@@ -10,18 +10,10 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 1
+    "Patch": 3
   },
   "instanceNameFormat": "Install and run Performance CLI",
   "inputs": [
-    {
-      "name": "args",
-      "type": "string",
-      "label": "CLI args",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Arguments for CLI"
-    },
     {
       "name": "ConfigFilePath",
       "type": "string",
@@ -40,7 +32,7 @@
   ],
   "execution": {
     "Node10": {
-      "target": "src/index.js"
+      "target": "index.js"
     }
   }
 }
