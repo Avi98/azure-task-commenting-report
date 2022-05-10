@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import * as task from "azure-pipelines-task-lib";
 import * as webApi from "azure-devops-node-api/WebApi";
-import { IGitApi } from "azure-devops-node-api/GitApi";
+import { variables } from "./utils/variables";
 
 interface ICreatePRComment {
   commentReport: VoidFunction;
@@ -10,41 +10,27 @@ interface ICreatePRComment {
 
 const reportPath = path.join(process.cwd(), "/comment.md");
 
-/**
- * 1. Authenticate the task using PAT or (Learn about the authentication in Azure service??)
- * 2. User azure client lib to fetch all the list of comments in the Pull request.
- * 	- iterate over the thread and find if the comment is there or not if there ignore
- * 	- Need to have comments as config basis. if comment.md not generated remove don't write the comment on PR
- * 	- if build donesn't have PR don't write the comment
- * 	- if comment is already there don't write comment again(??)
- * fetch all the comments threads.
- */
 class CreatePRComment implements ICreatePRComment {
   #commentFilePath: string | null;
   #canWriteComment: boolean;
+  #serverURL: string;
+  #pat: string;
 
   constructor() {
     this.#commentFilePath = reportPath;
     this.#canWriteComment = fs.existsSync(this.#commentFilePath);
+    this.#serverURL = variables.Env.System.ServerURL!;
+    this.#pat = variables.Env.Params.PAT!;
   }
 
-  private async getClient(): Promise<IGitApi> {
-    const pat = task.getInput("AzureDevOpsPat")!;
+  private async getClient() {
+    const pat = this.#pat;
+    const serverURL = this.#serverURL;
     const handler = webApi.getPersonalAccessTokenHandler(pat)!;
-
-    const connection = new webApi.WebApi(
-      task.getVariable("System.TeamFoundationServerUri")!,
-      handler
-    );
+    const connection = new webApi.WebApi(serverURL, handler);
     return await connection.getGitApi()!;
   }
 
-  /**
-   * check if comment is there or not.
-   * if comment exists update same comment.
-   *
-   * If no LH_comment is found. Add comment.
-   */
   commentReport() {
     if (!this.#canWriteComment) {
       task.debug("Comment file does not exist");
@@ -56,40 +42,53 @@ class CreatePRComment implements ICreatePRComment {
     }
     task.debug("Started to read LH_report from LH file");
 
-    const LH_REPORT_COMMENT = fs.readFileSync(this.#commentFilePath);
+    const LH_REPORT_COMMENT = fs.readFileSync("./comment.md");
     task.debug("----comment----");
     task.debug(LH_REPORT_COMMENT.toString());
     task.debug("---------------");
 
-    const repositoryId = task.getVariable("Build.Repository.ID") || "";
-    const pullRequestIdString = task.getVariable(
-      "System.PullRequest.PullRequestId"
-    );
+    const repositoryId = variables.Env.Params.RepositoryId;
+    const pullRequestIdString = variables.Env.System.PullRequestId;
 
+    task.debug(`pull request ID--> ${pullRequestIdString}`);
     if (!pullRequestIdString) return;
     const pullRequestId = parseInt(pullRequestIdString);
-
     this.getClient()
       .then(async (client) => {
-        //check if comment is there on the PR or not
+        task.debug("connection git api found ");
         const threads = await client.getThreads(repositoryId, pullRequestId);
+
         for (const thread of threads) {
+          console.log("thead", thread);
           if (thread.comments) {
             for (let comment of thread.comments) {
-              if (comment === LH_REPORT_COMMENT) {
+              task.debug("thread.comments" + JSON.stringify(comment));
+
+              // update comment on every run
+              if (comment?.content === LH_REPORT_COMMENT.toString()) {
                 return (comment.content = LH_REPORT_COMMENT.toString());
               }
             }
           }
 
-          // else if no comment is found the add one
-          if (pullRequestId !== 0) {
-            return await client.createThread(
-              thread,
+          return await client
+            .createThread(
+              {
+                comments: [
+                  {
+                    content: LH_REPORT_COMMENT.toString(),
+                  },
+                ],
+              },
               repositoryId,
               pullRequestId
-            );
-          }
+            )
+            .then(() => {
+              task.debug("new thread comment created");
+            })
+            .catch(() => {
+              throw new Error("New Thread cant be created");
+            });
         }
         return null;
       })

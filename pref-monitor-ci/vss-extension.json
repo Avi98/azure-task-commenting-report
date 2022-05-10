@@ -1,75 +1,98 @@
 {
-	"manifestVersion": 1,
-	"id": "5fe3e030-1add-6a2c-89b1-3dc0949111c0",
-	"version": "0.0.40",
-	"name": "Performance Monitor CI",
-	"publisher": "pref-monitor-ci",
-	"description": "Performance Monitor tool that is used to monitor and report the chrome web vitals metrics on the PR. It uses web-vitals-CLI to run the metrics and generate the report.",
-	"targets": [
-	  {
-	    "id": "Microsoft.VisualStudio.Services"
-	  }
-	],
-	"categories": [
-	  "Azure Pipelines"
-	],
-	"tags": [
-	  "Performance-report",
-	  "performance-ci"
-	],
-	"galleryFlags": [
-	  "Free",
-	  "Public"
-	],
-	"icons": {
-	  "default": "vss-extension-icon.png"
-	},
-	"content": {
-	  "details": {
-	    "path": "README.md"
-	  }
-	},
-	"files": [
-	  {
-	    "path": "task"
-	  }
-	  
-	],
-	"links": {
-	  "overview": {
-	    "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/README.md"
-	  },
-	  "license": {
-	    "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/LICENSE"
-	  },
-	  "repository": {
-	    "uri": "https://github.com/Avi98/azure-task-commenting-report"
-	  },
-	  "issues": {
-	    "uri": "https://github.com/Avi98/azure-task-commenting-report/issues"
-	  }
-	},
-	"repository": {
-	  "type": "git",
-	  "uri": "https://github.com/Avi98/azure-task-commenting-report"
-	},
-	"badges": [
-	  {
-	    "href": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_build/latest?definitionId=-1",
-	    "uri": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_apis/build/status/%5Bnetlify%5D%20dev%2C%20feature%2C%20hotfix",
-	    "description": "Build Status"
-	  }
-	],
-	"contributions": [
-		{
-			"id": "custom-build-release-task",
-			"type": "ms.vss-distributed-task.task",
-			"targets": [
-			    "ms.vss-distributed-task.tasks"
-			],
-			"properties": {
-			    "name": "task"
-			}
-		    } 
-	]
+  "manifestVersion": 1,
+  "id": "5fe3e030-1add-6a2c-89b1-3dc0949111c0",
+  "version": "0.0.46",
+  "name": "Performance Monitor CI",
+  "publisher": "pref-monitor-ci",
+  "description": "Performance Monitor tool that is used to monitor and report the chrome web vitals metrics on the PR. It uses web-vitals-CLI to run the metrics and generate the report.",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "categories": ["Azure Pipelines"],
+  "tags": ["Performance-report", "performance-ci"],
+  "galleryFlags": ["Free", "Public"],
+  "icons": {
+    "default": "vss-extension-icon.png"
+  },
+  "content": {
+    "details": {
+      "path": "README.md"
+    }
+  },
+  "files": [
+    {
+      "path": "task"
+    }
+  ],
+  "links": {
+    "overview": {
+      "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/README.md"
+    },
+    "license": {
+      "uri": "https://github.com/Avi98/azure-task-commenting-report/blob/master/LICENSE"
+    },
+    "repository": {
+      "uri": "https://github.com/Avi98/azure-task-commenting-report"
+    },
+    "issues": {
+      "uri": "https://github.com/Avi98/azure-task-commenting-report/issues"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/Avi98/azure-task-commenting-report"
+  },
+  "badges": [
+    {
+      "href": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_build/latest?definitionId=-1",
+      "uri": "https://dev.azure.com/aliencube/AzureDevOps.Extensions/_apis/build/status/%5Bnetlify%5D%20dev%2C%20feature%2C%20hotfix",
+      "description": "Build Status"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "service-endpoint",
+      "description": "Service Endpoint type for Azure DevOps PAT",
+      "type": "ms.vss-endpoint.service-endpoint-type",
+      "targets": ["ms.vss-endpoint.endpoint-types"],
+      "properties": {
+        "name": "perfReportCI",
+        "displayName": "Create comment azure task",
+        "config": {
+          "type": "string",
+          "description": "Put your Personal Access Token of the Azure DevOps",
+          "required": true
+        },
+        "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-none",
+            "inputDescriptors": [
+              {
+                "id": "pat",
+                "name": "PAT",
+                "description": "Azure DevOps Personal Access Token here.",
+                "inputMode": "passwordbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string"
+                }
+              }
+            ]
+          }
+        ],
+        "helpMarkDown": "Create a Pull Request Comment."
       }
+    },
+    {
+      "id": "custom-build-release-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": ["ms.vss-distributed-task.tasks"],
+      "properties": {
+        "name": "task"
+      }
+    }
+  ]
+}

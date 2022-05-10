@@ -3,7 +3,6 @@ import * as os from "os";
 import * as path from "path";
 import * as task from "azure-pipelines-task-lib/task";
 import { variables } from "./utils/variables";
-import { commentLHReport } from "./createPrComment";
 
 const { v4: uuid4 } = require("uuid");
 
@@ -21,6 +20,9 @@ export class PrefReportCI {
   async run() {
     const prefMonitor = this.#prefMonitor;
     const isInstalledPrefMonitor = task.which(prefMonitor);
+
+    //@TODO: test comment
+    return null;
 
     if (!isInstalledPrefMonitor) {
       task.debug(
@@ -52,7 +54,6 @@ export class PrefReportCI {
       .exec()
       .then(() => {
         task.debug(`-------Completed running the ${this.#prefMonitor}------`);
-        commentLHReport.commentReport();
       })
       .catch((error: any) => {
         task.setResult(task.TaskResult.Failed, error);

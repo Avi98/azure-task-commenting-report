@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "buildTaskV0": "rimraf .bin && tsc -b . && copyfiles -f ./tasks/prefMonitorCiV0/task.json ./.bin/task",
-    "buildTaskV1": "rimraf .bin && tsc -b . && copyfiles -f ./tasks/prefMonitorCiV1/task.json ./.bin/task",
-    "packTaskV0": "npm run buildTaskV0 && copyfiles package.json vss-extension.json vss-extension-icon.png LICENSE.md README.md ./.bin && loop \"npm install --only=prod\" --cwd ./.bin",
-    "packTaskV1": "npm run buildTaskV1 && copyfiles package.json vss-extension.json vss-extension-icon.png LICENSE.md README.md ./.bin && loop \"npm install --only=prod\" --cwd ./.bin",
-    "dev": "npm run buildTaskV1 && tsc -w && nodemon .bin/task/index.js",
+    "buildTaskV0": "rimraf .bin && tsc -b . && NODE_ENV=production && copyfiles -f ./tasks/prefMonitorCiV0/task.json package.json ./.bin/task",
+    "buildTaskV1": "rimraf .bin && tsc -b . && NODE_ENV=production && copyfiles -f ./tasks/prefMonitorCiV1/task.json package.json ./.bin/task",
+    "packTaskV0": "npm run buildTaskV0 && copyfiles vss-extension.json vss-extension-icon.png LICENSE.md README.md ./.bin && loop \"npm install --only=prod\" --cwd ./.bin/task",
+    "packTaskV1": "npm run buildTaskV1 && copyfiles vss-extension.json vss-extension-icon.png LICENSE.md README.md ./.bin && loop \"npm install --only=prod\" --cwd ./.bin/task",
+    "dev": "npm run buildTaskV1 && NODE_ENV=development DEBUG='*' NODE_DEBUG=http node --stack-trace-limit=100 .bin/task/index.js",
     "create": "tfx extension create -r .bin"
   },
   "author": "",
@@ -17,6 +17,7 @@
   "dependencies": {
     "azure-devops-node-api": "^11.1.1",
     "azure-pipelines-task-lib": "^3.1.10",
+    "dotenv": "^16.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
