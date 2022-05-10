@@ -8,7 +8,7 @@ export const variables = {
   Env: {
     //----params
     Params: {
-      SourceDirectory: getVariable("build.sourcesDirectory"),
+      SourceDirectory: getVariable("build.sourcesDirectory")!,
       RepositoryId: isDev
         ? process.env.REPOSITORY_ID!
         : getVariable("Build.Repository.ID"),

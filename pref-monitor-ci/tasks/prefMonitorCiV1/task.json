@@ -15,19 +15,11 @@
   "instanceNameFormat": "Install and run Performance CLI",
   "inputs": [
     {
-      "name": "ConfigFilePath",
-      "type": "string",
-      "label": "config file path",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Config file path for CLI"
-    },
-    {
       "name": "AzureDevopsPat",
       "type": "string",
       "label": "Personal Access Token",
       "required": true,
-      "helpMarkDown": "Pat token for azure"
+      "helpMarkDown": "Pat token for writing comments"
     }
   ],
   "execution": {

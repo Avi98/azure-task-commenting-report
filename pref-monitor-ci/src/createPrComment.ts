@@ -42,7 +42,17 @@ class CreatePRComment implements ICreatePRComment {
     }
     task.debug("Started to read LH_report from LH file");
 
-    const LH_REPORT_COMMENT = fs.readFileSync("./comment.md");
+    const prefReportPath = path.resolve(
+      variables.Env.Params.SourceDirectory,
+      "comment.md"
+    );
+    if (!fs.existsSync(prefReportPath)) {
+      task.setResult(task.TaskResult.Failed, "comment file does not exists");
+      task.debug("file not found at path--->" + prefReportPath);
+      return;
+    }
+
+    const LH_REPORT_COMMENT = fs.readFileSync(prefReportPath);
     task.debug("----comment----");
     task.debug(LH_REPORT_COMMENT.toString());
     task.debug("---------------");

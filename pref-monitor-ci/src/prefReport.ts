@@ -21,9 +21,6 @@ export class PrefReportCI {
     const prefMonitor = this.#prefMonitor;
     const isInstalledPrefMonitor = task.which(prefMonitor);
 
-    //@TODO: test comment
-    return null;
-
     if (!isInstalledPrefMonitor) {
       task.debug(
         `-------${prefMonitor} is not found. Installing ${prefMonitor}------`
@@ -35,9 +32,7 @@ export class PrefReportCI {
     task.debug(
       `-------${prefMonitor} is found at ${isInstalledPrefMonitor}------`
     );
-    await this.runPrefMonitor().catch((error) => {
-      task.setResult(task.TaskResult.Failed, error);
-    });
+    await this.runPrefMonitor();
     //@TODO
     // this.setBuildContext();
   }
@@ -54,9 +49,14 @@ export class PrefReportCI {
       .exec()
       .then(() => {
         task.debug(`-------Completed running the ${this.#prefMonitor}------`);
+        task.setResult(
+          task.TaskResult.Succeeded,
+          "Completed running pref monitor"
+        );
       })
       .catch((error: any) => {
         task.setResult(task.TaskResult.Failed, error);
+        throw error;
       });
   }
 
@@ -98,7 +98,10 @@ export class PrefReportCI {
         .arg("--noprofile")
         .arg(`--norc`)
         .arg(filePath)
-        .exec();
+        .exec()
+        .catch((error) => {
+          throw error;
+        });
 
       if (prefMonitorInstall !== 0) throw new Error("Failed to install");
       else {
@@ -107,6 +110,7 @@ export class PrefReportCI {
       fs.unlink(filePath, () => {});
     } catch (error) {
       task.setResult(task.TaskResult.Failed, error);
+      throw error;
     }
   }
 }
