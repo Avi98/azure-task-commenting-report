@@ -9,12 +9,11 @@ const { v4: uuid4 } = require("uuid");
 export class PrefReportCI {
   #prefMonitor: string = "pref-report-cli";
   #configFilePath: string = "";
+  #sourceDir: string = "";
 
   constructor() {
-    this.#configFilePath = path.resolve(
-      variables.Env.Params.SourceDirectory,
-      "webVitalsrc.js"
-    );
+    this.#sourceDir = variables.Env.Params.SourceDirectory;
+    this.#configFilePath = path.resolve(this.#sourceDir, "webVitalsrc.js");
   }
 
   async run() {
@@ -40,11 +39,14 @@ export class PrefReportCI {
   async runPrefMonitor() {
     const prefTool = this.#prefMonitor;
     const hasPrefTool = task.which(prefTool);
+    const tempDir = variables.Env.Agent.TempDir;
     task.debug(`prefTool --configFilePath ${this.#configFilePath}`);
     if (!hasPrefTool) return;
     await task
       .tool(prefTool)
       .line("--markdown")
+      //as pref-report cli will save comment file this location
+      .line(`--markdownFilePath ${tempDir}`)
       .line(`--configFilePath ${this.#configFilePath}`)
       .exec()
       .then(() => {

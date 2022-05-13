@@ -8,7 +8,7 @@ interface ICreatePRComment {
   commentReport: VoidFunction;
 }
 
-const reportPath = path.join(process.cwd(), "/comment.md");
+const reportPath = path.resolve(variables.Env.Agent.TempDir, "comment.md");
 
 class CreatePRComment implements ICreatePRComment {
   #commentFilePath: string | null;
@@ -33,7 +33,7 @@ class CreatePRComment implements ICreatePRComment {
 
   commentReport() {
     if (!this.#canWriteComment) {
-      task.debug("Comment file does not exist");
+      task.debug(`Comment file does not exist at ${this.#commentFilePath}`);
       return;
     }
     if (!this.#commentFilePath) {
@@ -42,17 +42,14 @@ class CreatePRComment implements ICreatePRComment {
     }
     task.debug("Started to read LH_report from LH file");
 
-    const prefReportPath = path.resolve(
-      variables.Env.Params.SourceDirectory,
-      "comment.md"
-    );
-    if (!fs.existsSync(prefReportPath)) {
+    const hasComment = fs.existsSync(this.#commentFilePath);
+    if (!hasComment) {
+      task.debug("file not found at path--->" + this.#commentFilePath);
       task.setResult(task.TaskResult.Failed, "comment file does not exists");
-      task.debug("file not found at path--->" + prefReportPath);
       return;
     }
 
-    const LH_REPORT_COMMENT = fs.readFileSync(prefReportPath);
+    const LH_REPORT_COMMENT = fs.readFileSync(this.#commentFilePath);
     task.debug("----comment----");
     task.debug(LH_REPORT_COMMENT.toString());
     task.debug("---------------");
@@ -99,6 +96,10 @@ class CreatePRComment implements ICreatePRComment {
             .catch(() => {
               throw new Error("New Thread cant be created");
             });
+        }
+        //remove comment file
+        if (hasComment) {
+          fs.unlinkSync(this.#commentFilePath!);
         }
         return null;
       })
