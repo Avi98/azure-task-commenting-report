@@ -9,12 +9,11 @@ const { v4: uuid4 } = require("uuid");
 export class PrefReportCI {
   #prefMonitor: string = "pref-report-cli";
   #configFilePath: string = "";
+  #sourceDir: string = "";
 
   constructor() {
-    this.#configFilePath = path.resolve(
-      variables.Env.Params.SourceDirectory,
-      "webVitalsrc.js"
-    );
+    this.#sourceDir = variables.Env.Params.SourceDirectory;
+    this.#configFilePath = path.resolve(this.#sourceDir, "webVitalsrc.js");
   }
 
   async run() {
@@ -32,9 +31,7 @@ export class PrefReportCI {
     task.debug(
       `-------${prefMonitor} is found at ${isInstalledPrefMonitor}------`
     );
-    await this.runPrefMonitor().catch((error) => {
-      task.setResult(task.TaskResult.Failed, error);
-    });
+    await this.runPrefMonitor();
     //@TODO
     // this.setBuildContext();
   }
@@ -42,28 +39,28 @@ export class PrefReportCI {
   async runPrefMonitor() {
     const prefTool = this.#prefMonitor;
     const hasPrefTool = task.which(prefTool);
+    const tempDir = variables.Env.Agent.TempDir;
     task.debug(`prefTool --configFilePath ${this.#configFilePath}`);
     if (!hasPrefTool) return;
     await task
       .tool(prefTool)
       .line("--markdown")
+      //as pref-report cli will save comment file this location
+      .line(`--markdownFilePath ${tempDir}`)
       .line(`--configFilePath ${this.#configFilePath}`)
       .exec()
       .then(() => {
         task.debug(`-------Completed running the ${this.#prefMonitor}------`);
+        task.setResult(
+          task.TaskResult.Succeeded,
+          "Completed running pref monitor"
+        );
       })
       .catch((error: any) => {
         task.setResult(task.TaskResult.Failed, error);
+        throw error;
       });
   }
-
-  // private readComment() {
-  //   try {
-  //     const filePath = this.#commentFilePath;
-  //     const data = fs.readFileSync(filePath);
-  //     console.log("data", data);
-  //   } catch (e) {}
-  // }
 
   private async installPrefMonitor() {
     try {
@@ -103,7 +100,10 @@ export class PrefReportCI {
         .arg("--noprofile")
         .arg(`--norc`)
         .arg(filePath)
-        .exec();
+        .exec()
+        .catch((error) => {
+          throw error;
+        });
 
       if (prefMonitorInstall !== 0) throw new Error("Failed to install");
       else {
@@ -112,6 +112,7 @@ export class PrefReportCI {
       fs.unlink(filePath, () => {});
     } catch (error) {
       task.setResult(task.TaskResult.Failed, error);
+      throw error;
     }
   }
 }

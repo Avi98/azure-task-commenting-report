@@ -10,30 +10,21 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 0
+    "Patch": 3
   },
   "instanceNameFormat": "Install and run Performance CLI",
   "inputs": [
     {
-      "name": "args",
+      "name": "AzureDevopsPat",
       "type": "string",
-      "label": "CLI args",
-      "defaultValue": "",
+      "label": "Personal Access Token",
       "required": true,
-      "helpMarkDown": "Arguments for CLI"
-    },
-    {
-      "name": "ConfigFilePath",
-      "type": "string",
-      "label": "config file path",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Config file path for CLI"
+      "helpMarkDown": "Pat token for writing comments"
     }
   ],
   "execution": {
     "Node10": {
-      "target": "src/index.js"
+      "target": "index.js"
     }
   }
 }
