@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "5fe3e030-1add-6a2c-89b1-3dc0949111c0",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "name": "Performance Monitor CI",
   "publisher": "pref-monitor-ci",
   "description": "Performance Monitor tool that is used to monitor and report the chrome web vitals metrics on the PR. It uses web-vitals-CLI to run the metrics and generate the report.",
