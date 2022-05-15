@@ -59,24 +59,26 @@ export class CreatePRComment implements ICreatePRComment {
       .then((response) => response);
   }
 
-  private async addCommentToThread(
+  private async updatePrefReportComment(
     pullRequestId: number,
     repositoryId: string,
-    threadId: number
+    threadId: number,
+    commentId: number
   ) {
     if (!this.#client) return;
 
-    (await this.#client).createComment(
+    (await this.#client).updateComment(
       { content: this.#prefReport!.toString() },
       repositoryId,
       pullRequestId,
-      threadId
+      threadId,
+      commentId
     );
   }
+
   private async createPrefThread(pullRequestId: number, repoId: string) {
     if (!this.#client) throw new Error("Git client not found");
 
-    console.log("this--->", this.#client);
     await this.#client
       .then(async (gitClient) => {
         return await gitClient.getThreads(repoId, pullRequestId);
@@ -101,19 +103,34 @@ export class CreatePRComment implements ICreatePRComment {
           return;
         }
 
-        commentThreads.forEach((thread) => {
-          const hasPrefThread =
-            Boolean(thread.properties) &&
-            Object.keys(thread.properties)?.includes("is-pref-report");
+        const prefReportThread: GitPullRequestCommentThread[] = [];
 
-          // @todo: need to check for same comment if not updated don't add comment
-          if (thread.properties && hasPrefThread) {
-            this.addCommentToThread(pullRequestId, repoId, thread.id!);
+        commentThreads.forEach((thread) => {
+          if ("is-pref-report" in thread.properties) {
+            prefReportThread.push(thread);
           }
         });
+
+        prefReportThread.forEach((thread) => {
+          // if has thread update thread
+          const commentId = thread.comments?.[0].id;
+          if (commentId)
+            this.updatePrefReportComment(
+              pullRequestId,
+              repoId,
+              thread.id!,
+              commentId
+            );
+        });
+        if (prefReportThread.length === 0) {
+          this.createNewPrefReportThread({
+            commentPayload,
+            pullRequestId,
+            repoId,
+          });
+        }
       })
       .catch((error) => {
-        console.log("errorr", error);
         throw error;
       });
   }
