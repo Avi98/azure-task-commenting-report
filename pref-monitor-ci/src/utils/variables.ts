@@ -17,7 +17,7 @@ export const variables = {
     Agent: {
       JobStatus: getVariable("AGENT_JOB_STATUS"),
       Name: getVariable("AGENT_NAME"),
-      TempDir: getVariable("AGENT_TEMPDIRECTORY"),
+      TempDir: isDev ? process.env.temDir! : getVariable("AGENT_TEMPDIRECTORY"),
     },
     System: {
       AccessToken: getVariable("SYSTEM_ACCESSTOKEN"),
